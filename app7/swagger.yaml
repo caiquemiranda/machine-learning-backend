@@ -1,0 +1,683 @@
+openapi: 3.0.3
+info:
+  title: API de Previsão de Preços de Imóveis com Banco de Dados
+  description: |
+    Uma API RESTful para previsão de preços de imóveis com persistência em banco de dados.
+    
+    Funcionalidades:
+    * Treinamento de modelos de machine learning
+    * Previsão de preços
+    * Armazenamento de histórico de treinamentos e previsões
+    * Consulta de estatísticas
+  
+  version: "7.0.0"
+  contact:
+    name: Suporte
+    email: suporte@exemplo.com
+
+servers:
+  - url: http://localhost:8000
+    description: Servidor de desenvolvimento local
+
+tags:
+  - name: Informações
+    description: Informações sobre a API
+  - name: Previsão
+    description: Endpoints para previsão de preços
+  - name: Treinamento
+    description: Endpoints para treinamento de modelos
+  - name: Histórico
+    description: Endpoints para consulta de histórico
+
+paths:
+  /:
+    get:
+      tags:
+        - Informações
+      summary: Informações da API
+      description: Retorna informações básicas sobre a API
+      operationId: getRoot
+      responses:
+        '200':
+          description: Operação bem-sucedida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  mensagem:
+                    type: string
+                    example: "API de Previsão de Preços de Imóveis v7.0 com Banco de Dados"
+
+  /status:
+    get:
+      tags:
+        - Informações
+      summary: Status do modelo
+      description: Retorna informações sobre o modelo carregado e estatísticas da API
+      operationId: getStatus
+      responses:
+        '200':
+          description: Operação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatusOutput'
+
+  /prever:
+    post:
+      tags:
+        - Previsão
+      summary: Prever preço
+      description: Realiza previsão de preço com base nas características do imóvel
+      operationId: predictPrice
+      requestBody:
+        description: Características do imóvel
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PrevisaoInput'
+        required: true
+      responses:
+        '200':
+          description: Previsão bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PrevisaoOutput'
+        '400':
+          description: Entrada inválida ou modelo não treinado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /treinar:
+    post:
+      tags:
+        - Treinamento
+      summary: Treinar modelo
+      description: Treina o modelo com dados fornecidos
+      operationId: trainModel
+      requestBody:
+        description: Dados para treinamento do modelo
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TreinamentoInput'
+        required: true
+      responses:
+        '200':
+          description: Treinamento bem-sucedido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  request_id:
+                    type: string
+                    example: "f8d2e580-1b3a-4c1a-8c8e-5a5f2a7f9e6c"
+                  mensagem:
+                    type: string
+                    example: "Modelo treinado e salvo com sucesso"
+                  num_amostras:
+                    type: integer
+                    example: 10
+                  r2_score:
+                    type: number
+                    format: float
+                    example: 0.95
+                  rmse:
+                    type: number
+                    format: float
+                    example: 15000.5
+                  mae:
+                    type: number
+                    format: float
+                    example: 12500.2
+                  training_time_seconds:
+                    type: number
+                    format: float
+                    example: 0.156
+                  features_utilizadas:
+                    type: array
+                    items:
+                      type: string
+                    example: ["area", "quartos", "banheiros", "idade_imovel"]
+        '400':
+          description: Erro de treinamento
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Erro de validação
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /previsoes:
+    get:
+      tags:
+        - Histórico
+      summary: Histórico de previsões
+      description: Retorna o histórico de previsões realizadas
+      operationId: getPredictionHistory
+      parameters:
+        - name: limit
+          in: query
+          description: Número máximo de registros a retornar
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+        - name: offset
+          in: query
+          description: Índice a partir do qual retornar registros
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Operação bem-sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HistoricoPrevisao'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /treinamentos:
+    get:
+      tags:
+        - Histórico
+      summary: Histórico de treinamentos
+      description: Retorna o histórico de treinamentos realizados
+      operationId: getTrainingHistory
+      parameters:
+        - name: limit
+          in: query
+          description: Número máximo de registros a retornar
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: Índice a partir do qual retornar registros
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Operação bem-sucedida
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TrainingHistory'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /treinamentos/{treinamento_id}:
+    get:
+      tags:
+        - Histórico
+      summary: Detalhes de um treinamento
+      description: Retorna detalhes completos de um treinamento específico
+      operationId: getTrainingDetails
+      parameters:
+        - name: treinamento_id
+          in: path
+          description: ID do treinamento
+          required: true
+          schema:
+            type: integer
+          example: 1
+        - name: include_samples
+          in: query
+          description: Incluir amostras utilizadas no treinamento
+          required: false
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Operação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrainingDetails'
+        '404':
+          description: Treinamento não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Erro interno
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    PrevisaoInput:
+      type: object
+      required:
+        - area
+      properties:
+        area:
+          type: number
+          format: float
+          description: Área do imóvel em metros quadrados
+          minimum: 0
+          exclusiveMinimum: true
+          example: 100.5
+        quartos:
+          type: integer
+          description: Número de quartos
+          minimum: 0
+          example: 2
+        banheiros:
+          type: integer
+          description: Número de banheiros
+          minimum: 0
+          example: 1
+        idade_imovel:
+          type: integer
+          description: Idade do imóvel em anos
+          minimum: 0
+          example: 5
+
+    PrevisaoOutput:
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: Identificador único da requisição
+          example: "f8d2e580-1b3a-4c1a-8c8e-5a5f2a7f9e6c"
+        timestamp:
+          type: string
+          format: date-time
+          description: Data e hora da previsão
+          example: "2023-05-01T12:00:00"
+        area:
+          type: number
+          format: float
+          description: Área do imóvel
+          example: 100.5
+        quartos:
+          type: integer
+          nullable: true
+          description: Número de quartos
+          example: 2
+        banheiros:
+          type: integer
+          nullable: true
+          description: Número de banheiros
+          example: 1
+        idade_imovel:
+          type: integer
+          nullable: true
+          description: Idade do imóvel em anos
+          example: 5
+        preco_previsto:
+          type: number
+          format: float
+          description: Preço previsto
+          example: 350000.0
+        faixa_confianca:
+          type: array
+          description: Faixa de confiança para a previsão
+          minItems: 2
+          maxItems: 2
+          items:
+            type: number
+            format: float
+          example: [315000.0, 385000.0]
+
+    TreinamentoInput:
+      type: object
+      required:
+        - features
+        - precos
+      properties:
+        features:
+          type: array
+          description: Lista de características dos imóveis
+          items:
+            type: object
+            required:
+              - area
+            properties:
+              area:
+                type: number
+                format: float
+                description: Área do imóvel em metros quadrados
+                example: 100.5
+              quartos:
+                type: integer
+                nullable: true
+                description: Número de quartos
+                example: 2
+              banheiros:
+                type: integer
+                nullable: true
+                description: Número de banheiros
+                example: 1
+              idade_imovel:
+                type: integer
+                nullable: true
+                description: Idade do imóvel em anos
+                example: 5
+          example:
+            - area: 100.5
+              quartos: 2
+              banheiros: 1
+              idade_imovel: 5
+            - area: 150.0
+              quartos: 3
+              banheiros: 2
+              idade_imovel: 3
+        precos:
+          type: array
+          description: Lista de preços correspondentes aos imóveis
+          items:
+            type: number
+            format: float
+          example: [350000.0, 450000.0]
+
+    StatusOutput:
+      type: object
+      properties:
+        modelo_salvo:
+          type: boolean
+          description: Indica se o modelo está salvo em disco
+          example: true
+        modelo_carregado:
+          type: boolean
+          description: Indica se o modelo está carregado na memória
+          example: true
+        features_suportadas:
+          type: array
+          description: Lista de features suportadas pelo modelo
+          items:
+            type: string
+          example: ["area", "quartos", "banheiros", "idade_imovel"]
+        numero_amostras_treinamento:
+          type: integer
+          nullable: true
+          description: Número de amostras utilizadas no treinamento
+          example: 10
+        estatisticas_api:
+          type: object
+          description: Estatísticas da API
+          properties:
+            total_requests:
+              type: integer
+              description: Total de requisições recebidas
+              example: 25
+            successful_requests:
+              type: integer
+              description: Total de requisições bem-sucedidas
+              example: 23
+            failed_requests:
+              type: integer
+              description: Total de requisições com erro
+              example: 2
+            ultimo_erro:
+              type: object
+              nullable: true
+              description: Último erro registrado
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                  example: "2023-05-01T12:00:00"
+                request_id:
+                  type: string
+                  example: "f8d2e580-1b3a-4c1a-8c8e-5a5f2a7f9e6c"
+                path:
+                  type: string
+                  example: "/prever"
+                error:
+                  type: string
+                  example: "Erro ao carregar modelo"
+            uptime_start:
+              type: string
+              format: date-time
+              description: Data e hora de início da API
+              example: "2023-05-01T10:00:00"
+            uptime_seconds:
+              type: number
+              format: float
+              description: Tempo de atividade da API em segundos
+              example: 7200.5
+        metricas_banco_dados:
+          type: object
+          description: Estatísticas do banco de dados
+          properties:
+            total_treinamentos:
+              type: integer
+              description: Total de treinamentos registrados
+              example: 5
+            total_previsoes:
+              type: integer
+              description: Total de previsões registradas
+              example: 20
+            total_dados_treinamento:
+              type: integer
+              description: Total de dados de treinamento registrados
+              example: 50
+            ultimo_treinamento:
+              type: object
+              nullable: true
+              description: Último treinamento registrado
+              $ref: '#/components/schemas/TrainingHistory'
+
+    HistoricoPrevisao:
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: Identificador único da requisição
+          example: "f8d2e580-1b3a-4c1a-8c8e-5a5f2a7f9e6c"
+        timestamp:
+          type: string
+          format: date-time
+          description: Data e hora da previsão
+          example: "2023-05-01T12:00:00"
+        input:
+          type: object
+          description: Características do imóvel
+          properties:
+            area:
+              type: number
+              format: float
+              example: 100.5
+            quartos:
+              type: integer
+              nullable: true
+              example: 2
+            banheiros:
+              type: integer
+              nullable: true
+              example: 1
+            idade_imovel:
+              type: integer
+              nullable: true
+              example: 5
+        preco_previsto:
+          type: number
+          format: float
+          description: Preço previsto
+          example: 350000.0
+        faixa_confianca:
+          type: array
+          description: Faixa de confiança para a previsão
+          minItems: 2
+          maxItems: 2
+          items:
+            type: number
+            format: float
+          example: [315000.0, 385000.0]
+
+    TrainingHistory:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Identificador único do treinamento
+          example: 1
+        request_id:
+          type: string
+          description: Identificador único da requisição
+          example: "f8d2e580-1b3a-4c1a-8c8e-5a5f2a7f9e6c"
+        timestamp:
+          type: string
+          format: date-time
+          description: Data e hora do treinamento
+          example: "2023-05-01T12:00:00"
+        num_amostras:
+          type: integer
+          description: Número de amostras utilizadas no treinamento
+          example: 10
+        r2_score:
+          type: number
+          format: float
+          description: Coeficiente de determinação (R²)
+          example: 0.95
+        rmse:
+          type: number
+          format: float
+          nullable: true
+          description: Raiz do erro quadrático médio
+          example: 15000.5
+        mae:
+          type: number
+          format: float
+          nullable: true
+          description: Erro absoluto médio
+          example: 12500.2
+        coeficientes:
+          type: object
+          description: Coeficientes do modelo
+          additionalProperties:
+            type: number
+            format: float
+          example:
+            area: 2000.5
+            quartos: 15000.0
+            banheiros: 10000.0
+            idade_imovel: -500.0
+            intercepto: 50000.0
+        features_utilizadas:
+          type: array
+          description: Features utilizadas no treinamento
+          items:
+            type: string
+          example: ["area", "quartos", "banheiros", "idade_imovel"]
+
+    TrainingDetails:
+      allOf:
+        - $ref: '#/components/schemas/TrainingHistory'
+        - type: object
+          properties:
+            dados_treinamento:
+              type: array
+              description: Dados utilizados no treinamento
+              items:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    example: 1
+                  area:
+                    type: number
+                    format: float
+                    example: 100.5
+                  quartos:
+                    type: integer
+                    nullable: true
+                    example: 2
+                  banheiros:
+                    type: integer
+                    nullable: true
+                    example: 1
+                  idade_imovel:
+                    type: integer
+                    nullable: true
+                    example: 5
+                  preco:
+                    type: number
+                    format: float
+                    example: 350000.0
+
+    ErrorResponse:
+      type: object
+      properties:
+        request_id:
+          type: string
+          description: Identificador único da requisição
+          example: "f8d2e580-1b3a-4c1a-8c8e-5a5f2a7f9e6c"
+        timestamp:
+          type: string
+          format: date-time
+          description: Data e hora do erro
+          example: "2023-05-01T12:00:00"
+        error:
+          type: string
+          description: Tipo de erro
+          example: "Validation Error"
+        detail:
+          type: string
+          description: Detalhes do erro
+          example: "Campo 'area': valor deve ser maior que 0"
+        path:
+          type: string
+          description: Caminho da requisição
+          example: "/prever"
+        http_status:
+          type: integer
+          description: Código HTTP do erro
+          example: 422 

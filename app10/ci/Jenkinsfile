@@ -1,0 +1,96 @@
+pipeline {
+    agent {
+        docker {
+            image 'python:3.9-slim'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    
+    environment {
+        DOCKER_COMPOSE_VERSION = '2.17.2'
+    }
+    
+    stages {
+        stage('Setup') {
+            steps {
+                sh '''
+                apt-get update && apt-get install -y docker.io curl
+                curl -L "https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                chmod +x /usr/local/bin/docker-compose
+                pip install -r requirements.txt
+                '''
+            }
+        }
+        
+        stage('Lint') {
+            steps {
+                sh '''
+                flake8 .
+                black --check .
+                isort --check .
+                mypy .
+                '''
+            }
+        }
+        
+        stage('Test') {
+            steps {
+                sh '''
+                pytest tests/ --cov=app10 --cov-report=xml
+                '''
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                sh '''
+                docker-compose build
+                '''
+            }
+        }
+        
+        stage('Deploy to Staging') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh '''
+                echo "Deploying to staging environment"
+                docker-compose -f docker-compose.yml -f docker-compose.staging.yml up -d
+                '''
+            }
+        }
+        
+        stage('Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh '''
+                echo "Deploying to production environment"
+                docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            sh '''
+            docker-compose down || true
+            '''
+            
+            publishCoverage adapters: [cobertura('coverage.xml')]
+            
+            cleanWs()
+        }
+        
+        success {
+            echo 'Build succeeded!'
+        }
+        
+        failure {
+            echo 'Build failed!'
+        }
+    }
+} 

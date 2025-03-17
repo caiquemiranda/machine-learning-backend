@@ -1,0 +1,103 @@
+version: '3.8'
+
+services:
+  # Serviço de API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./modelos:/app/modelos
+    depends_on:
+      - redis
+      - db
+    environment:
+      - DEBUG=False
+      - API_KEY=${API_KEY}
+      - DB_HOST=db
+      - DB_NAME=app10
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    restart: always
+    networks:
+      - app-network
+
+  # Serviço Worker Celery
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./modelos:/app/modelos
+    depends_on:
+      - redis
+      - db
+    environment:
+      - DEBUG=False
+      - API_KEY=${API_KEY}
+      - DB_HOST=db
+      - DB_NAME=app10
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    restart: always
+    networks:
+      - app-network
+  
+  # Serviço Redis (broker para Celery)
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: always
+    networks:
+      - app-network
+
+  # Serviço de Banco de Dados PostgreSQL
+  db:
+    image: postgres:13-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=app10
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    restart: always
+    networks:
+      - app-network
+
+  # Serviço Flower (monitoramento Celery)
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    command: celery -A app10.worker flower --port=5555
+    ports:
+      - "5555:5555"
+    depends_on:
+      - worker
+      - redis
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    restart: always
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  postgres_data: 
