@@ -1,0 +1,56 @@
+version: '3.8'
+
+services:
+  # Serviço do banco de dados
+  db:
+    image: postgres:13
+    container_name: ml-predictions-db
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: ml_predictions
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Serviço do backend
+  backend:
+    build:
+      context: ./backend
+    container_name: ml-predictions-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ml_predictions
+      - SECRET_KEY=91c9f3d33a5ca0ce469a8d2fb62f73d10f3a64bcabb145f7d3d8dc0e4c98f23c
+      - ALGORITHM=HS256
+      - ACCESS_TOKEN_EXPIRE_MINUTES=30
+    volumes:
+      - ./backend:/app
+      - model_data:/app/models
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+
+  # Serviço do frontend
+  frontend:
+    build:
+      context: ./frontend
+    container_name: ml-predictions-frontend
+    depends_on:
+      - backend
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  model_data: 
