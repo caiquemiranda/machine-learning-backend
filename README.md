@@ -1,6 +1,6 @@
 # Série de Projetos de Backend com Machine Learning
 
-Este repositório contém uma série de 10 projetos progressivos que demonstram a evolução de uma aplicação backend com foco em Machine Learning. Cada projeto adiciona novas funcionalidades e conceitos, permitindo um aprendizado gradual e estruturado de técnicas avançadas de integração de ML com sistemas backend.
+Este repositório contém uma série de 15 projetos progressivos que demonstram a evolução de uma aplicação backend com foco em Machine Learning. Cada projeto adiciona novas funcionalidades e conceitos, permitindo um aprendizado gradual e estruturado de técnicas avançadas de integração de ML com sistemas backend.
 
 ## Progressão dos Projetos
 
@@ -74,18 +74,60 @@ Este repositório contém uma série de 10 projetos progressivos que demonstram 
 - Configurações para diferentes ambientes
 - Deploy automatizado
 
+### App 11: Previsão de Preço de Casas (Fullstack)
+- Sistema fullstack completo (FastAPI + React)
+- Modelo de regressão linear para previsão de preços de casas
+- Integração de frontend React com backend FastAPI
+- Interface de usuário interativa para entrada de dados
+- Persistência em PostgreSQL
+- Orquestração com Docker Compose
+
+### App 12: Classificação de Feedbacks (NLP)
+- Sistema de classificação de feedbacks em positivos/negativos
+- Processamento de Linguagem Natural (NLP)
+- Upload de textos e arquivos para processamento
+- Visualização de confiança da classificação
+- Interface moderna com React e Bootstrap
+- Histórico de classificações realizadas
+
+### App 13: Sistema de Diagnóstico Preditivo
+- Diagnóstico preditivo de saúde baseado em parâmetros do paciente
+- Classificação em diferentes níveis de risco
+- Dashboard com métricas e estatísticas do modelo
+- Visualizações avançadas (matriz de confusão, importância de features)
+- Treinamento e configuração de modelos pela interface
+- Arquitetura completa de microserviços
+
+### App 14: Estimador de Tempo de Atendimento
+- Previsão de tempo de atendimento baseado em tipo e complexidade
+- Gerenciamento de tipos de solicitação
+- Histórico de estimativas com tempos reais
+- Visualizações avançadas por tipo de solicitação e complexidade
+- Treinamento com dados históricos ou upload de CSV
+- Interface intuitiva para operadores de atendimento
+
+### App 15: Sistema Multi-usuário de Previsões com JWT
+- Autenticação completa com JWT
+- Registro, login e perfis de usuários
+- Modelos de classificação e regressão acessíveis por usuário
+- Histórico de previsões por usuário
+- Dashboard personalizado com estatísticas
+- Interface React com React Bootstrap
+- Proteção de rotas por tipo de usuário
+- Logs de atividades de usuários
+
 ## Tecnologias Utilizadas na Progressão
 
 | Tecnologia | Aplicações |
 |------------|------------|
-| **Frameworks Web** | Flask (App1), FastAPI (App2-10) |
-| **Machine Learning** | scikit-learn, pandas, numpy |
-| **Banco de Dados** | SQLite (App4-8), PostgreSQL (App9-10) |
+| **Frameworks Web** | Flask (App1), FastAPI (App2-15) |
+| **Machine Learning** | scikit-learn, pandas, numpy, NLTK |
+| **Banco de Dados** | SQLite (App4-8), PostgreSQL (App9-15) |
 | **Processamento Assíncrono** | Celery, Redis (App9-10) |
-| **Frontend/UI** | Swagger/ReDoc, Matplotlib/Plotly para visualizações |
-| **Deploy/DevOps** | Docker, Docker Compose, GitHub Actions, Jenkins |
+| **Frontend/UI** | React, Bootstrap, Chart.js, Axios (App11-15) |
+| **Deploy/DevOps** | Docker, Docker Compose, Nginx |
 | **Monitoramento** | Prometheus, Sentry, Logging customizado |
-| **Autenticação** | JWT, OAuth (App6-10) |
+| **Autenticação** | JWT, OAuth, Passlib/Bcrypt |
 
 ## Como Utilizar os Projetos
 
@@ -101,6 +143,8 @@ Recomendamos seguir a progressão numérica para um aprendizado gradual, mas cad
 ## Requisitos Globais
 
 - Python 3.7+
+- Docker e Docker Compose (para projetos mais avançados)
+- Node.js e npm (para projetos com frontend)
 - Conhecimentos básicos de:
   - Programação Python
   - Conceitos de APIs REST
