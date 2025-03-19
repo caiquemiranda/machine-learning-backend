@@ -1,0 +1,61 @@
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #f8f9fa;
+}
+
+code {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+        monospace;
+}
+
+.card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: 0.3s;
+}
+
+.card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.form-label {
+    font-weight: 500;
+}
+
+.table-container {
+    margin-top: 20px;
+    overflow-x: auto;
+}
+
+.table th {
+    background-color: #f1f1f1;
+}
+
+.tempo-estimado {
+    font-weight: bold;
+    color: #0d6efd;
+}
+
+.complexity-badge-1 {
+    background-color: #28a745;
+}
+
+.complexity-badge-2 {
+    background-color: #17a2b8;
+}
+
+.complexity-badge-3 {
+    background-color: #ffc107;
+}
+
+.complexity-badge-4 {
+    background-color: #fd7e14;
+}
+
+.complexity-badge-5 {
+    background-color: #dc3545;
+}

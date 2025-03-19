@@ -1,0 +1,69 @@
+.App {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.navbar-brand {
+    font-weight: 700;
+}
+
+.container {
+    flex: 1;
+}
+
+footer {
+    margin-top: auto;
+}
+
+.card-header {
+    background-color: #f1f8ff;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.alert {
+    margin-top: 1rem;
+}
+
+.result-card {
+    margin-top: 2rem;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.table thead th {
+    position: sticky;
+    top: 0;
+    background-color: white;
+    z-index: 1;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+.nav-link.active {
+    font-weight: bold;
+}
